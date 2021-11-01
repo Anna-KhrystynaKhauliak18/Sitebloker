@@ -11,6 +11,8 @@ ApplicationWindow {
     Universal.theme: Universal.Light
     Universal.accent: Universal.Cobalt
     Component.onCompleted: getDNS();
+    property string primaryServer: '0.0.0.0'
+    property string secondaryServer: '0.0.0.0'
 
     Column {
         id: column
@@ -21,12 +23,12 @@ ApplicationWindow {
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
-            Text { id: primaryDNS; text: "0.0.0.0"}
+            Text { id: primaryDNS; text: primaryServer}
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: secondaryPlaceholder; text: "Current secondary DNS: " }
-            Text { id: secondaryDNS; text: "0.0.0.0" }
+            Text { id: secondaryDNS; text: secondaryServer }
         }
     }
 
