@@ -2,12 +2,18 @@
 import os
 from pathlib import Path
 import sys
+import dns.resolver
 
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 
+def getDNS():
+    console.log("Called function getDNS")
+    my_resolver = dns.resolver.Resolver()
+    console.log(my_resolver.nameservers)
 
 if __name__ == "__main__":
+    sys.argv += ['--style', 'universal']
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
