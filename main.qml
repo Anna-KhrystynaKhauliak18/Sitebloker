@@ -12,7 +12,9 @@ ApplicationWindow {
     title: qsTr("Site-blocker")
     Universal.theme: Universal.System
     Universal.accent: Universal.Cobalt
-    Component.onCompleted: getDNS()
+    Component.onCompleted: getDNS();
+    property string primaryServer: '0.0.0.0'
+    property string secondaryServer: '0.0.0.0'
 
     Column {
         id: column
@@ -23,12 +25,12 @@ ApplicationWindow {
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
-            Text { id: primaryDNS; text: primaryAddress}
+            Text { id: primaryDNS; text: primaryServer}
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: secondaryPlaceholder; text: "Current secondary DNS: " }
-            Text { id: secondaryDNS; text: secondryAddress }
+            Text { id: secondaryDNS; text: secondaryServer }
         }
     }
 
