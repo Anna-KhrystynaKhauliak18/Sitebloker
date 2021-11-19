@@ -4,15 +4,15 @@ import QtQuick.Controls 2.12
 import QtQuick.Controls.Universal 2.12
 
 Window {
+    property string primaryAddress: '0.0.0.0'
+    property string secondryAddress: '0.0.0.0'
     width: 800
     height: 600
     visible: true
     title: qsTr("Site-blocker")
-    Universal.theme: Universal.Light
+    Universal.theme: Universal.System
     Universal.accent: Universal.Cobalt
     Component.onCompleted: getDNS();
-    property string primaryServer: '0.0.0.0'
-    property string secondaryServer: '0.0.0.0'
 
     Column {
         id: column
@@ -23,12 +23,12 @@ Window {
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
-            Text { id: primaryDNS; text: primaryServer}
+            Text { id: primaryDNS; text: "0.0.0.0"}
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: secondaryPlaceholder; text: "Current secondary DNS: " }
-            Text { id: secondaryDNS; text: secondaryServer }
+            Text { id: secondaryDNS; text: "0.0.0.0" }
         }
         
     }
@@ -51,7 +51,7 @@ Window {
     Button {
         id: config_button
         text: "Config"
-        width: 40
+        width: 80
         height: 40
         x: (parent.width - width - 5)
         y: (parent.height - height - 5)
