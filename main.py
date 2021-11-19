@@ -14,7 +14,7 @@ def getDNS():
     console.log(my_resolver.nameservers)
 
 if __name__ == "__main__":
-    sys.argv += ['--style', 'universal']
+    sys.argv += ['--style', 'imagine']
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
