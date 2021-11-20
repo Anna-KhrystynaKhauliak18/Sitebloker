@@ -12,7 +12,8 @@ Window {
     title: qsTr("Site-blocker")
     Universal.theme: Universal.System
     Universal.accent: Universal.Cobalt
-    Component.onCompleted: getDNS();
+    property string primaryServer: '0.0.0.0'
+    property string secondaryServer: '0.0.0.0'
 
     Column {
         id: column
@@ -23,12 +24,13 @@ Window {
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
-            Text { id: primaryDNS; text: "0.0.0.0"}
+            Text { id: primaryDNS; text: primaryServer }
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: secondaryPlaceholder; text: "Current secondary DNS: " }
-            Text { id: secondaryDNS; text: "0.0.0.0" }
+            Text { id: secondaryDNS; text: secondaryServer }
+            
         }
         
     }
@@ -42,9 +44,42 @@ Window {
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
         Column {
-            CheckBox { text: qsTr("E-mail") }
-            CheckBox { text: qsTr("Calendar") }
-            CheckBox { text: qsTr("Contacts") }
+            Row {
+            id: row
+            x: parent.x + 5
+            y: parent.y + 5
+            width: 200
+            height: 400
+            
+            Switch {
+                id: switch1
+                width: parent.width
+                text: qsTr("Dark mode")
+            }
+         Row {
+             width: 200
+             height: 400
+             
+            ComboBox {
+                 model: listModel
+             }
+
+             ListModel {
+                 id: listModel
+                 Component.onCompleted: {
+                    for (var i = 0; i < 24; i++) {
+                        append(createListElement());
+                    }
+                }
+                function createListElement() {
+                    return {
+                        hour: "01"
+                    };
+                }
+             }
+         }
+         
+        }
         }
     }
 

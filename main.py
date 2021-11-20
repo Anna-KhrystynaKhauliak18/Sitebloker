@@ -9,20 +9,29 @@ from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 
 def getDNS():
-    console.log("Called function getDNS")
-    my_resolver = dns.resolver.Resolver()
-    console.log(my_resolver.nameservers)
+    print("Called function getDNS")
+    getter = dns.resolver.Resolver()
+
+    try:
+        engine.rootObjects()[0].setProperty('primaryServer', getter.nameservers[0])
+    except IndexError:
+        print('Error at detecting primary DNS. It can\'t be empty even in the hell!')
+
+    try:
+        engine.rootObjects()[0].setProperty('secondaryServer', getter.nameservers[1])
+    except IndexError:
+        print('Error at detecting secondary DNS. It can be empty, though it\'s unrecommended.')
+
+#def changeResolver(self):
+    
 
 if __name__ == "__main__":
-    sys.argv += ['--style', 'imagine']
+    sys.argv += ['--style', 'universal']
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
+    getDNS()
     if not engine.rootObjects():
         sys.exit(-1)
     sys.exit(app.exec_())
 
-def getDNS():
-    my_resolver = dns.resolver.Resolver()
-    print(my_resolver.nameservers[0])
-    engine.rootObjects()[0].setProperty('primaryServer', my_resolver.nameservers[0])
