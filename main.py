@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import dns.resolver
 
+#import settings_rc
 
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
@@ -26,7 +27,7 @@ def getDNS():
     
 
 if __name__ == "__main__":
-    sys.argv += ['--style', 'universal']
+    #sys.argv += ['--style', 'material']
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))

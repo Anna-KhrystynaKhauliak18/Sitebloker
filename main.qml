@@ -1,17 +1,30 @@
 import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
-import QtQuick.Controls.Universal 2.12
 
 Window {
-    property string primaryAddress: '0.0.0.0'
-    property string secondryAddress: '0.0.0.0'
+    property string backgroundColor: "#FFFFFF"
+    property string primary: "#6200EE"
+    property string textOnPrimary: "#FFFFFF"
+
+    id: window
+
+    function setTheme(theme) {
+
+        if (theme === "Dark") {
+            backgroundColor = "#121212"
+
+        } else if (theme === "Light") {
+            backgroundColor = "#FFFFFF"
+        }
+        window.color = backgroundColor
+    }
+
+    color: background
     width: 800
     height: 600
     visible: true
     title: qsTr("Site-blocker")
-    Universal.theme: Universal.System
-    Universal.accent: Universal.Cobalt
     property string primaryServer: '0.0.0.0'
     property string secondaryServer: '0.0.0.0'
 
@@ -20,7 +33,23 @@ Window {
         anchors.centerIn: parent
         spacing: 16
         padding: 5
-        RoundButton { property int size: 160; anchors.horizontalCenter: parent.horizontalCenter; id:start; width: size; height: size; text: "Start"; font.pixelSize: 24; antialiasing: true; font.family: qsTr("Segoe UI"); clip: false; highlighted: true; flat: false; radius: 250 }
+        RoundButton {
+            property int size: 160;
+            palette.button: "salmon"
+            anchors.horizontalCenter: parent.horizontalCenter;
+            id:start;
+            width: size;
+            height: size;
+            text: "Start";
+            font.pixelSize: 24;
+            layer.smooth: true
+            layer.mipmap: true
+            antialiasing: true;
+            font.family: qsTr("Segoe UI");
+            clip: false;
+            highlighted: true;
+            flat: false;
+            radius: 250 }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
@@ -35,6 +64,10 @@ Window {
         
     }
     Popup {
+        background: Rectangle {
+            color: backgroundColor
+        }
+
         id: popup
         width: parent.width - 40
         height: parent.height - 40
@@ -43,43 +76,27 @@ Window {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-        Column {
-            Row {
-            id: row
-            x: parent.x + 5
-            y: parent.y + 5
-            width: 200
-            height: 400
-            
-            Switch {
-                id: switch1
-                width: parent.width
-                text: qsTr("Dark mode")
-            }
-         Row {
-             width: 200
-             height: 400
-             
-            ComboBox {
-                 model: listModel
-             }
+        
+            Column {
+                Row {
+                id: row
+                x: parent.x + 5
+                y: parent.y + 5
+                width: 200
+                height: 400
+                
+                ListModel {
+                    id: themes
 
-             ListModel {
-                 id: listModel
-                 Component.onCompleted: {
-                    for (var i = 0; i < 24; i++) {
-                        append(createListElement());
-                    }
+                    ListElement { name: "Light" }
+                    ListElement { name: "Dark" }
                 }
-                function createListElement() {
-                    return {
-                        hour: "01"
-                    };
+
+                ComboBox {
+                    model: themes
+                    onCurrentTextChanged: { setTheme(currentText) }
                 }
-             }
-         }
-         
-        }
+            }
         }
     }
 
