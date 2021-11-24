@@ -3,28 +3,23 @@ import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
 
 Window {
-    //property string backgroundColor: "#FFFFFF"
-    //property string primary: "#6200EE"
-    //property string textOnPrimary: "#FFFFFF"
+    property string backgroundColor: "#FFFFFF"
+    property string primary: "#6200EE"
+    property string textOnPrimary: "#FFFFFF"
+
     id: window
-    Palette {
-        id: lightPalette
-        button: "#6200EE"
-        window: "#FFFFFF"
-    }
-    Palette {
-        id: darkPalette
-        button: lightPalette.button
-        window: "#121212"
-    }
+
     function setTheme(theme) {
+
         if (theme === "Dark") {
-            palette = darkPalette
+            backgroundColor = "#121212"
 
         } else if (theme === "Light") {
-            palette = lightPalette
+            backgroundColor = "#FFFFFF"
         }
+        window.color = backgroundColor
     }
+
     color: background
     width: 800
     height: 600
@@ -32,23 +27,29 @@ Window {
     title: qsTr("Site-blocker")
     property string primaryServer: '0.0.0.0'
     property string secondaryServer: '0.0.0.0'
+
     Column {
         id: column
         anchors.centerIn: parent
         spacing: 16
         padding: 5
         RoundButton {
-            radius: 250
+            property int size: 160;
+            palette.button: "salmon"
             anchors.horizontalCenter: parent.horizontalCenter;
             id:start;
             width: size;
             height: size;
             text: "Start";
             font.pixelSize: 24;
+            layer.smooth: true
+            layer.mipmap: true
             antialiasing: true;
             font.family: qsTr("Segoe UI");
+            clip: false;
             highlighted: true;
-            }
+            flat: false;
+            radius: 250 }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             Text { id: primaryPlaceholder; text: "Current primary DNS: " }
