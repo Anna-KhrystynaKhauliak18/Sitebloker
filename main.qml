@@ -2,20 +2,22 @@ import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
 
+
 Window {
     property string backgroundColor: "#FFFFFF"
     property string primary: "#6200EE"
     property string textOnPrimary: "#FFFFFF"
-
+    property string textOnBackground: "#000000"
     id: window
-
     function setTheme(theme) {
 
         if (theme === "Dark") {
             backgroundColor = "#121212"
+            textOnBackground = "#FFFFFF"
 
         } else if (theme === "Light") {
             backgroundColor = "#FFFFFF"
+            textOnBackground = "#000000"
         }
         window.color = backgroundColor
     }
@@ -28,37 +30,36 @@ Window {
     property string primaryServer: '0.0.0.0'
     property string secondaryServer: '0.0.0.0'
 
+    signal button_signal()
+
     Column {
         id: column
         anchors.centerIn: parent
         spacing: 16
         padding: 5
         RoundButton {
-            property int size: 160;
-            palette.button: "salmon"
+            radius: 200
             anchors.horizontalCenter: parent.horizontalCenter;
-            id:start;
-            width: size;
-            height: size;
+            id: start;
+            width: radius;
+            height: radius;
             text: "Start";
             font.pixelSize: 24;
-            layer.smooth: true
-            layer.mipmap: true
             antialiasing: true;
             font.family: qsTr("Segoe UI");
-            clip: false;
             highlighted: true;
             flat: false;
-            radius: 250 }
+            onClicked: button_signal()
+            }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            Text { id: primaryPlaceholder; text: "Current primary DNS: " }
-            Text { id: primaryDNS; text: primaryServer }
+            Text { id: primaryPlaceholder; text: "Current primary DNS: "; color: textOnBackground }
+            Text { id: primaryDNS; text: primaryServer; color: textOnBackground }
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            Text { id: secondaryPlaceholder; text: "Current secondary DNS: " }
-            Text { id: secondaryDNS; text: secondaryServer }
+            Text { id: secondaryPlaceholder; text: "Current secondary DNS: "; color: textOnBackground }
+            Text { id: secondaryDNS; text: secondaryServer; color: textOnBackground }
             
         }
         
@@ -75,7 +76,7 @@ Window {
         y: (parent.height - height) / 2
         modal: true
         focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        closePolicy: Popup.CloseOnPressOutsideParent | Popup.CloseOnEscape
         
             Column {
                 Row {
