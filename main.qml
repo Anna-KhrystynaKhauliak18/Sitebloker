@@ -77,30 +77,71 @@ Window {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnPressOutsideParent | Popup.CloseOnEscape
-        
+        Column {
             Column {
-                Row {
-                id: row
+                padding: 5
                 x: parent.x + 5
                 y: parent.y + 5
                 width: 200
-                height: 400
-                
+                height: 80
+
+                Text {
+                    id: themeCaption
+                    text: "Theme (restart not required)"
+                    y: (parent.height - themeSelector.height - height) / 2
+                }
                 ListModel {
                     id: themes
 
-                    ListElement { name: "Light" }
-                    ListElement { name: "Dark" }
+                    ListElement {
+                        name: "Light"
+                    }
+                    ListElement {
+                        name: "Dark"
+                    }
                 }
-
                 ComboBox {
+                    id: themeSelector
                     model: themes
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: 0
+                    anchors.bottomMargin: 0
+                    width: parent.width
                     onCurrentTextChanged: { setTheme(currentText) }
+                }
+            }
+            Column {
+                padding: 5
+                topPadding: 20
+                x: parent.x + 5
+                y: parent.y + 5
+                width: 200
+                height: 80
+                Text {
+                    id: themeCaption1
+                    text: "Select DNS server"
+                    y: (parent.height - serverChooser.height - height) / 2
+                }
+                ListModel {
+                    id: serversList
+
+                    function addItem(serverName) {
+                        serversList.append( { "name": serverName } )
+                    }
+                }
+                ComboBox {
+                    id: serverChooser
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: 0
+                    anchors.bottomMargin: 0
+                    model: serversList
+                    width: parent.width
                 }
             }
         }
     }
-
     Button {
         id: config_button
         text: "Config"
@@ -110,6 +151,12 @@ Window {
         y: (parent.height - height - 5)
         onClicked: popup.open()
     }
-}
 
+    Connections {
+        target: program
+        onAddListItem: {
+                serversList.addItem(name)
+        }
+    }
+}
 
