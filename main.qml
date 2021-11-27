@@ -32,11 +32,24 @@ Window {
 
     signal button_signal()
 
+    signal init_signal()
+
+    Button {
+        id: config_button
+        text: qsTr("Config")
+        width: 80
+        height: 40
+        x: (parent.width - width - 5)
+        y: (parent.height - height - 5)
+        onClicked: popup.open()
+    }
+
     Column {
         id: column
         anchors.centerIn: parent
         spacing: 16
         padding: 5
+
         RoundButton {
             radius: 200
             anchors.horizontalCenter: parent.horizontalCenter;
@@ -50,24 +63,25 @@ Window {
             highlighted: true;
             flat: false;
             onClicked: button_signal()
-            }
+        }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            Text { id: primaryPlaceholder; text: "Current primary DNS: "; color: textOnBackground }
+            Text { id: primaryPlaceholder; text: qsTr("Current primary DNS: "); color: textOnBackground }
             Text { id: primaryDNS; text: primaryServer; color: textOnBackground }
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            Text { id: secondaryPlaceholder; text: "Current secondary DNS: "; color: textOnBackground }
-            Text { id: secondaryDNS; text: secondaryServer; color: textOnBackground }
-            
+            Text { id: secondaryPlaceholder; text: qsTr("Current secondary DNS: "); color: textOnBackground }
+            Text { id: secondaryDNS; text: secondaryServer; color: textOnBackground } 
         }
-        
     }
+        
+    Timer {
+        interval: 10; running: true; repeat: false
+        onTriggered: button_signal() }
+
     Popup {
-        background: Rectangle {
-            color: backgroundColor
-        }
+        background: Rectangle { color: backgroundColor }
 
         id: popup
         width: parent.width - 40
@@ -89,6 +103,7 @@ Window {
                     id: themeCaption
                     text: "Theme (restart not required)"
                     y: (parent.height - themeSelector.height - height) / 2
+                    color: textOnBackground
                 }
                 ListModel {
                     id: themes
@@ -122,12 +137,14 @@ Window {
                     id: themeCaption1
                     text: "Select DNS server"
                     y: (parent.height - serverChooser.height - height) / 2
+                    color: textOnBackground
                 }
                 ListModel {
                     id: serversList
 
                     function addItem(serverName) {
                         serversList.append( { "name": serverName } )
+                        console.log(serverName)
                     }
                 }
                 ComboBox {
@@ -142,21 +159,15 @@ Window {
             }
         }
     }
-    Button {
-        id: config_button
-        text: "Config"
-        width: 80
-        height: 40
-        x: (parent.width - width - 5)
-        y: (parent.height - height - 5)
-        onClicked: popup.open()
-    }
+
 
     Connections {
         target: program
+        
         onAddListItem: {
-                serversList.addItem(name)
+            serversList.addItem(name)
         }
     }
-}
 
+
+}
