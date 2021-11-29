@@ -31,7 +31,7 @@ Window {
     property string secondaryServer: '0.0.0.0'
 
     signal button_signal()
-
+    signal setServer(string server)
     signal init_signal()
 
     Button {
@@ -155,6 +155,7 @@ Window {
                     anchors.bottomMargin: 0
                     model: serversList
                     width: parent.width
+                    onCurrentTextChanged: setServer(currentText)
                 }
             }
         }

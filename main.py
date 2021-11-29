@@ -42,9 +42,10 @@ class Program(QObject):
         super(Program, self).__init__()
 
     @Slot(str, result=str)
-    def test(self):
-        print("Test slot")
-        self.populateServers()
+    def startServer(self):
+        from modules import zoneconfig_gen
+        create_zonefile(google.com, "3600")
+        
 
     @Slot(str, result=str)
     def test2(self):
@@ -57,6 +58,13 @@ class Program(QObject):
             print(list(self.servers.keys())[i])
             self.addListItem.emit(str(list(keys)[i]))
 
+    @Slot(str)
+    def setDNS(self, server):
+        serverIP = self.servers.get(server)
+        print(serverIP)
+        self.server = serverIP
+        print(self.server)
+
 
 if __name__ == "__main__":
     # sys.argv += ['--style', 'material']
@@ -65,12 +73,12 @@ if __name__ == "__main__":
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
     getDNS()
-    program.someSignal.connect(program.test)
-    program.someSignal.emit()
+    
 
     if not engine.rootObjects():
         sys.exit(-1)
-
+    print(engine.rootObjects()[0])
     engine.rootContext().setContextProperty("program", program)
-    engine.rootObjects()[0].button_signal.connect(program.test2, type=Qt.ConnectionType.AutoConnection)
+    engine.rootObjects()[0].button_signal.connect(program.startServer, type=Qt.ConnectionType.AutoConnection)
+    engine.rootObjects()[0].setServer.connect(program.setDNS, type=Qt.ConnectionType.AutoConnection)
     sys.exit(app.exec_())
