@@ -1,1 +1,5 @@
 Sitebloker.pyproject.user.*
+*.pyc
+__pycache__/*.*
+*.zone
+*.pyc

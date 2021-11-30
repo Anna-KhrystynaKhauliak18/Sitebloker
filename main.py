@@ -43,15 +43,38 @@ class Program(QObject):
 
     @Slot(str, result=str)
     def startServer(self):
-        from modules import zoneconfig_gen
-        create_zonefile(google.com, "3600")
+        from modules import zoneconfig_gen as gen
+        gen.create_zonefile("google.com", "3600")
+        # self.addSite("google.com")
+        self.generate_zones_from_config('banlist.ini')
+
+    def generate_zones_from_config(self, configfile):
+        import configparser
+        from modules import zoneconfig_gen as gen
+        conf = configparser.ConfigParser()
+        conf.read(configfile)
+        banned_dict = dict(conf.items('BANLIST'))
+        banned = banned_dict.values()
+        for domain in banned:
+            gen.create_zonefile(domain, 3600)
+
+    def addSite(self, domain):
+        import configparser, random
+        conf = configparser.ConfigParser(strict=False)
+
+        conf.read('banlist.ini')
         
+        conf.set('BANLIST', f'domain{random.randint(1000,5000)}', domain)
+        with open('banlist.ini', 'r+') as configfile:
+            conf.write(configfile)
+
 
     @Slot(str, result=str)
     def test2(self):
         print("Test2")
         self.populateServers()
 
+    @Slot(str)
     def populateServers(self):
         keys = self.servers.keys()
         for i in range(len(list(keys))):
@@ -80,5 +103,6 @@ if __name__ == "__main__":
     print(engine.rootObjects()[0])
     engine.rootContext().setContextProperty("program", program)
     engine.rootObjects()[0].button_signal.connect(program.startServer, type=Qt.ConnectionType.AutoConnection)
+    engine.rootObjects()[0].init_signal.connect(program.populateServers, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].setServer.connect(program.setDNS, type=Qt.ConnectionType.AutoConnection)
     sys.exit(app.exec_())
