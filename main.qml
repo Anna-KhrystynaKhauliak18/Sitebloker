@@ -167,6 +167,10 @@ Window {
 
     Connections {
         target: program
+
+        onStartSignal: {
+            RoundButton.text = "Stop"
+        }
         
         onAddListItem: {
             serversList.addItem(name)

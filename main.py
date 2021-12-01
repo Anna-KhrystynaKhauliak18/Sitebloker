@@ -1,8 +1,6 @@
 # This Python file uses the following encoding: utf-8
-import os
-import configparser
+import os, signal, sys, subprocess
 from pathlib import Path
-import sys
 import dns.resolver
 
 from PySide2.QtGui import QGuiApplication
@@ -29,6 +27,10 @@ class Program(QObject):
 
     server = "0.0.0.0"
 
+    server_status = False   # False - вимкнено, True - увімкнено 
+    server_pid = 0
+
+    startSignal = Signal()
     someSignal = Signal()
     addListItem = Signal(str, arguments=['name'])
 
@@ -40,13 +42,28 @@ class Program(QObject):
 
     def __init__(self):
         super(Program, self).__init__()
+        self.generate_zones_from_config('banlist.ini')
+        getDNS()
 
     @Slot(str, result=str)
     def startServer(self):
         from modules import zoneconfig_gen as gen
-        gen.create_zonefile("google.com", "3600")
         # self.addSite("google.com")
-        self.generate_zones_from_config('banlist.ini')
+
+        if self.server_status:
+            # print(result.pid)
+            # subprocess.Popen.kill(result)
+            print(os.kill(self.server_pid, signal.SIGTERM)) 
+            self.server_status = False
+        else:
+            self.startSignal.emit()
+            result = subprocess.Popen(['python','fakedns.py', '-c', 'fakedns.banlist.conf'], shell=True)
+            print(result)
+            self.server_status = True
+            self.server_pid = result.pid
+            print(self.server_pid)
+
+
 
     def generate_zones_from_config(self, configfile):
         import configparser
@@ -55,8 +72,9 @@ class Program(QObject):
         conf.read(configfile)
         banned_dict = dict(conf.items('BANLIST'))
         banned = banned_dict.values()
+        gen.wipe_zonefile('fakedns.banlist.conf')
         for domain in banned:
-            gen.create_zonefile(domain, 3600)
+            gen.create_zonefile(domain, "0.0.0.0")
 
     def addSite(self, domain):
         import configparser, random
