@@ -7,18 +7,18 @@ from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 from PySide2.QtCore import QObject, Slot, Signal, Qt
 
-
+@Slot(int)
 def getDNS():
-    print("Called function getDNS")
+    # print("Called function getDNS")
     getter = dns.resolver.Resolver()
 
     try:
-        engine.rootObjects()[0].setProperty('primaryServer', getter.nameservers[0])
+        engine.rootObjects()[0].setProperty('primaryServer', getter.nameservers[1])
     except IndexError:
         print('Error at detecting primary DNS. It can\'t be empty even in the hell!')
 
     try:
-        engine.rootObjects()[0].setProperty('secondaryServer', getter.nameservers[1])
+        engine.rootObjects()[0].setProperty('secondaryServer', getter.nameservers[2])
     except IndexError:
         print('Error at detecting secondary DNS. It can be empty, though it\'s unrecommended.')
 
@@ -30,9 +30,12 @@ class Program(QObject):
     server_status = False   # False - вимкнено, True - увімкнено 
     server_pid = 0
 
+    system_nic = ''
+
     startSignal = Signal()
     someSignal = Signal()
-    addListItem = Signal(str, arguments=['name'])
+    addServersItem = Signal(str, arguments=['name'])
+    addInterfacesItem = Signal(str, arguments=['name'])
 
     servers = { "Quad9": "9.9.9.9",
                 "Test": "127.0.0.1",
@@ -40,10 +43,11 @@ class Program(QObject):
                 "Google Main": "8.8.8.8",
                 "Google Backup": "8.8.4.4" }
 
+
     def __init__(self):
         super(Program, self).__init__()
         self.generate_zones_from_config('banlist.ini')
-        getDNS()
+
 
     @Slot(str, result=str)
     def startServer(self):
@@ -64,7 +68,6 @@ class Program(QObject):
             print(self.server_pid)
 
 
-
     def generate_zones_from_config(self, configfile):
         import configparser
         from modules import zoneconfig_gen as gen
@@ -75,6 +78,7 @@ class Program(QObject):
         gen.wipe_zonefile('fakedns.banlist.conf')
         for domain in banned:
             gen.create_zonefile(domain, "0.0.0.0")
+
 
     def addSite(self, domain):
         import configparser, random
@@ -92,12 +96,25 @@ class Program(QObject):
         print("Test2")
         self.populateServers()
 
+
     @Slot(str)
     def populateServers(self):
         keys = self.servers.keys()
-        for i in range(len(list(keys))):
-            print(list(self.servers.keys())[i])
-            self.addListItem.emit(str(list(keys)[i]))
+        for i in keys:
+            print(i)
+            self.addServersItem.emit(i)
+        self.populateInterfaces()
+
+
+    @Slot(str, result=str)
+    def populateInterfaces(self):
+        import psutil
+        addrs = psutil.net_if_addrs()
+        nics = addrs.keys()
+        print(nics)
+        for i in nics:
+            self.addInterfacesItem.emit(i)
+
 
     @Slot(str)
     def setDNS(self, server):
@@ -107,20 +124,28 @@ class Program(QObject):
         print(self.server)
 
 
+    @Slot(str)
+    def setNIC(self, nic):
+        print(nic)
+        self.system_nic = nic 
+        print(self.system_nic)
+
+
 if __name__ == "__main__":
     # sys.argv += ['--style', 'material']
     program = Program()
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
-    getDNS()
     
 
     if not engine.rootObjects():
         sys.exit(-1)
     print(engine.rootObjects()[0])
     engine.rootContext().setContextProperty("program", program)
+    engine.rootObjects()[0].dns_signal.connect(getDNS, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].button_signal.connect(program.startServer, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].init_signal.connect(program.populateServers, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].setServer.connect(program.setDNS, type=Qt.ConnectionType.AutoConnection)
+    engine.rootObjects()[0].setInterface.connect(program.setNIC, type=Qt.ConnectionType.AutoConnection)
     sys.exit(app.exec_())

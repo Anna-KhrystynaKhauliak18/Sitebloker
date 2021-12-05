@@ -32,7 +32,9 @@ Window {
 
     signal button_signal()
     signal setServer(string server)
+    signal setInterface(string nic)
     signal init_signal()
+    signal dns_signal()
 
     Button {
         id: config_button
@@ -56,10 +58,10 @@ Window {
             id: start;
             width: radius;
             height: radius;
-            text: "Start";
+            text: qsTr("Start");
             font.pixelSize: 24;
             antialiasing: true;
-            font.family: qsTr("Segoe UI");
+            font.family: "Segoe UI";
             highlighted: true;
             flat: false;
             onClicked: button_signal()
@@ -78,7 +80,14 @@ Window {
         
     Timer {
         interval: 10; running: true; repeat: false
-        onTriggered: init_signal() }
+        onTriggered: init_signal()
+        }
+    
+    Timer {
+        interval: 10; running: true; repeat: true
+        onTriggered: dns_signal()
+    }
+
 
     Popup {
         background: Rectangle { color: backgroundColor }
@@ -111,10 +120,10 @@ Window {
                         id: themes
 
                         ListElement {
-                            name: "Light"
+                            name: qsTr("Light")
                         }
                         ListElement {
-                            name: "Dark"
+                            name: qsTr("Dark")
                         }
                     }
                     ComboBox {
@@ -137,7 +146,7 @@ Window {
                     height: 80
                     Text {
                         id: themeCaption1
-                        text: "Select DNS server"
+                        text: qsTr("DNS server")
                         y: (parent.height - serverChooser.height - height) / 2
                         color: textOnBackground
                     }
@@ -146,7 +155,7 @@ Window {
 
                         function addItem(serverName) {
                             serversList.append( { "name": serverName } )
-                            console.log(serverName)
+                            //console.log(serverName)
                         }
                     }
                     ComboBox {
@@ -155,9 +164,43 @@ Window {
                         anchors.bottom: parent.bottom
                         anchors.rightMargin: 0
                         anchors.bottomMargin: 0
+                        currentIndex: 1
                         model: serversList
                         width: parent.width
                         onCurrentTextChanged: setServer(currentText)
+                    }
+                }
+                Column {
+                    padding: 5
+                    topPadding: 20
+                    x: parent.x + 5
+                    y: parent.y + 5
+                    width: 200
+                    height: 80
+                    Text {
+                        id: interfaceLabel
+                        text: qsTr("Network interface")
+                        y: (parent.height - serverChooser.height - height) / 2
+                        color: textOnBackground
+                    }
+                    ListModel {
+                        id: interfacesList
+
+                        function addItem(interfaceName) {
+                            interfacesList.append( { "name": interfaceName } )
+                            //console.log(interfaceName)
+                        }
+                    }
+                    ComboBox {
+                        id: interfaceChooser
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: 0
+                        anchors.bottomMargin: 0
+                        currentIndex: 0
+                        model: interfacesList
+                        width: parent.width
+                        onCurrentTextChanged: setInterface(currentText)
                     }
                 }
             }
@@ -169,11 +212,15 @@ Window {
         target: program
 
         onStartSignal: {
-            RoundButton.text = "Stop"
+            RoundButton.text = qsTr("Stop")
         }
         
-        onAddListItem: {
+        onAddServersItem: {
             serversList.addItem(name)
+        }
+
+        onAddInterfacesItem: {
+            interfacesList.addItem(name)
         }
     }
 
