@@ -164,7 +164,7 @@ Window {
                         anchors.bottom: parent.bottom
                         anchors.rightMargin: 0
                         anchors.bottomMargin: 0
-                        currentIndex: 1
+                        currentIndex: 0
                         model: serversList
                         width: parent.width
                         onCurrentTextChanged: setServer(currentText)

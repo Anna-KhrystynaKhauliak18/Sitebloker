@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-import os, signal, sys, subprocess
+import os, sys, re, signal, psutil
 from pathlib import Path
 import dns.resolver
 
@@ -12,15 +12,31 @@ def getDNS():
     # print("Called function getDNS")
     getter = dns.resolver.Resolver()
 
-    try:
-        engine.rootObjects()[0].setProperty('primaryServer', getter.nameservers[1])
-    except IndexError:
-        print('Error at detecting primary DNS. It can\'t be empty even in the hell!')
+    dnss = getter.nameservers
+
+    for i in dnss:
+        if re.search('^(192.168)', i):
+            dnss.remove(i)
+
+    for i in dnss:
+        if re.search('^(172)', i):
+            dnss.remove(i)
+
+    for i in dnss:
+        if re.search('^(10)', i):
+            dnss.remove(i)
 
     try:
-        engine.rootObjects()[0].setProperty('secondaryServer', getter.nameservers[2])
+        engine.rootObjects()[0].setProperty('primaryServer', dnss[0])
     except IndexError:
-        print('Error at detecting secondary DNS. It can be empty, though it\'s unrecommended.')
+        engine.rootObjects()[0].setProperty('primaryServer', '0.0.0.0')
+        # print('Error at detecting primary DNS. It can\'t be empty even in the hell!')
+
+    try:
+        engine.rootObjects()[0].setProperty('secondaryServer', dnss[1])
+    except IndexError:
+        engine.rootObjects()[0].setProperty('secondaryServer', '0.0.0.0')
+        # print('Error at detecting secondary DNS. It can be empty, though it\'s unrecommended.')
 
 
 class Program(QObject):
@@ -29,6 +45,7 @@ class Program(QObject):
 
     server_status = False   # False - вимкнено, True - увімкнено 
     server_pid = 0
+    server_thread =''
 
     system_nic = ''
 
@@ -54,18 +71,24 @@ class Program(QObject):
         from modules import zoneconfig_gen as gen
         # self.addSite("google.com")
 
-        if self.server_status:
-            # print(result.pid)
-            # subprocess.Popen.kill(result)
-            print(os.kill(self.server_pid, signal.SIGTERM)) 
-            self.server_status = False
-        else:
+        if self.server_status == False:
+            os.system(f'Powershell Start dns.bat -ArgumentList "{self.system_nic}","127.0.0.1" -Verb Runas')
             self.startSignal.emit()
-            result = subprocess.Popen(['python','fakedns.py', '-c', 'fakedns.banlist.conf'], shell=True)
-            print(result)
+            process = os.system(f'start cmd /k fakedns.bat {self.server}') # subprocess.Popen(['python','fakedns.py', '-c', 'fakedns.banlist.conf', '--dns', self.server], shell=True)
             self.server_status = True
-            self.server_pid = result.pid
-            print(self.server_pid)
+            
+        elif self.server_status == True:
+            for proc in psutil.process_iter(['pid', 'name', 'username']):
+                if 'cmd.exe' in proc.name():
+                    print(str(proc.info) + '\n')
+                    children = psutil.Process(proc.pid).children()
+                    for child in children:
+                        print(child.pid)
+                        os.kill(child.pid, signal.SIGINT)
+            os.system(f'Powershell Start dns.bat -ArgumentList "{self.system_nic}","9.9.9.9" -Verb Runas')
+            self.server_status = False
+        
+        
 
 
     def generate_zones_from_config(self, configfile):
@@ -91,8 +114,8 @@ class Program(QObject):
             conf.write(configfile)
 
 
-    @Slot(str, result=str)
-    def test2(self):
+    # @Slot(str, result=str)
+    # def test2(self):
         print("Test2")
         self.populateServers()
 
