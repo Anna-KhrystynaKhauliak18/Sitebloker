@@ -1,0 +1,3 @@
+dnspython==2.1.0
+psutil==5.8.0
+PySide2==5.15.2

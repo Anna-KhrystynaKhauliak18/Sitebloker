@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-import os, sys, re, signal, psutil
+import os, sys, re, subprocess, psutil
 from pathlib import Path
 import dns.resolver
 
@@ -47,7 +47,8 @@ class Program(QObject):
     server_pid = 0
     server_thread =''
 
-    system_nic = ''
+    window_pid = ''
+    system_nic = 'Ethernet'
 
     startSignal = Signal()
     someSignal = Signal()
@@ -55,7 +56,6 @@ class Program(QObject):
     addInterfacesItem = Signal(str, arguments=['name'])
 
     servers = { "Quad9": "9.9.9.9",
-                "Test": "127.0.0.1",
                 "Cloudflare": "1.1.1.1",
                 "Google Main": "8.8.8.8",
                 "Google Backup": "8.8.4.4" }
@@ -69,26 +69,30 @@ class Program(QObject):
     @Slot(str, result=str)
     def startServer(self):
         from modules import zoneconfig_gen as gen
-        # self.addSite("google.com")
+        self.window_pid = os.getpid()
+        print(self.window_pid)
 
         if self.server_status == False:
             os.system(f'Powershell Start dns.bat -ArgumentList "{self.system_nic}","127.0.0.1" -Verb Runas')
             self.startSignal.emit()
-            process = os.system(f'start cmd /k fakedns.bat {self.server}') # subprocess.Popen(['python','fakedns.py', '-c', 'fakedns.banlist.conf', '--dns', self.server], shell=True)
+            process = os.system(f'start cmd /c fakedns.bat {self.server}') # subprocess.Popen(['python','fakedns.py', '-c', 'fakedns.banlist.conf', '--dns', self.server], shell=True)
             self.server_status = True
             
         elif self.server_status == True:
+            os.system(f'Powershell Start dns.bat -ArgumentList "{self.system_nic}","9.9.9.9" -Verb Runas')
             for proc in psutil.process_iter(['pid', 'name', 'username']):
                 if 'cmd.exe' in proc.name():
                     print(str(proc.info) + '\n')
                     children = psutil.Process(proc.pid).children()
                     for child in children:
                         print(child.pid)
-                        os.kill(child.pid, signal.SIGINT)
-            os.system(f'Powershell Start dns.bat -ArgumentList "{self.system_nic}","9.9.9.9" -Verb Runas')
+                        subprocess.check_output("Taskkill /PID %d /F" % child.pid)
             self.server_status = False
         
-        
+    @Slot(bool)
+    def shutdown(self):
+        print('Shutting down...')
+
 
 
     def generate_zones_from_config(self, configfile):
@@ -112,12 +116,6 @@ class Program(QObject):
         conf.set('BANLIST', f'domain{random.randint(1000,5000)}', domain)
         with open('banlist.ini', 'r+') as configfile:
             conf.write(configfile)
-
-
-    # @Slot(str, result=str)
-    # def test2(self):
-        print("Test2")
-        self.populateServers()
 
 
     @Slot(str)
@@ -156,6 +154,7 @@ class Program(QObject):
 
 if __name__ == "__main__":
     # sys.argv += ['--style', 'material']
+    os.chmod('dns.bat', 777)
     program = Program()
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
@@ -171,4 +170,5 @@ if __name__ == "__main__":
     engine.rootObjects()[0].init_signal.connect(program.populateServers, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].setServer.connect(program.setDNS, type=Qt.ConnectionType.AutoConnection)
     engine.rootObjects()[0].setInterface.connect(program.setNIC, type=Qt.ConnectionType.AutoConnection)
+    engine.rootObjects()[0].close_signal.connect(program.shutdown, type=Qt.ConnectionType.AutoConnection)
     sys.exit(app.exec_())

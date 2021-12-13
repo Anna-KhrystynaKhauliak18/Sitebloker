@@ -30,11 +30,15 @@ Window {
     property string primaryServer: '0.0.0.0'
     property string secondaryServer: '0.0.0.0'
 
+
     signal button_signal()
     signal setServer(string server)
     signal setInterface(string nic)
     signal init_signal()
     signal dns_signal()
+    signal close_signal()
+    
+    onClosing: close_signal()
 
     Button {
         id: config_button
@@ -58,7 +62,7 @@ Window {
             id: start;
             width: radius;
             height: radius;
-            text: qsTr("Start");
+            text: qsTr("Start/Stop");
             font.pixelSize: 24;
             antialiasing: true;
             font.family: "Segoe UI";
