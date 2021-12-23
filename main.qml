@@ -1,6 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.12
+import QtQuick.Extras 1.4
 
 
 Window {
@@ -14,10 +15,12 @@ Window {
         if (theme === "Dark") {
             backgroundColor = "#121212"
             textOnBackground = "#FFFFFF"
+            config_button.source = "settings_dark.png"
 
         } else if (theme === "Light") {
             backgroundColor = "#FFFFFF"
             textOnBackground = "#000000"
+            config_button.source = "settings.png"
         }
         window.color = backgroundColor
     }
@@ -25,6 +28,10 @@ Window {
     color: background
     width: 800
     height: 600
+    maximumHeight: height
+    maximumWidth: width
+    minimumHeight: height
+    minimumWidth: width
     visible: true
     title: qsTr("Site-blocker")
     property string primaryServer: '0.0.0.0'
@@ -39,15 +46,14 @@ Window {
     signal close_signal()
     
     onClosing: close_signal()
-
-    Button {
+    Image {
         id: config_button
-        text: qsTr("Config")
-        width: 80
-        height: 40
-        x: (parent.width - width - 5)
-        y: (parent.height - height - 5)
-        onClicked: popup.open()
+        source: "settings.png"
+        width: 32
+        height: 32
+        x: (parent.width - width - 6)
+        y: (parent.height - height - 6)
+        MouseArea { anchors.fill: parent; onClicked: popup.open() }
     }
 
     Column {
@@ -56,7 +62,7 @@ Window {
         spacing: 16
         padding: 5
 
-        RoundButton {
+        /*ToggleButton {
             radius: 200
             anchors.horizontalCenter: parent.horizontalCenter;
             id: start;
@@ -69,6 +75,14 @@ Window {
             highlighted: true;
             flat: false;
             onClicked: button_signal()
+        }*/
+        ToggleButton {
+            id: start;
+            onClicked: button_signal()
+            width: 200
+            height: 200
+            text: qsTr("Start/Stop");
+            antialiasing: true;
         }
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
